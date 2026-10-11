@@ -19,7 +19,13 @@ local found_a_missing_program=false
 
 deploy_feature () {
 preflight_check
-     echo "Deploy selected"
+read -p "Enter your project name: " name
+     if [ -z "$name" ]; then 
+             echo "Empty!!. Please input the project name"
+             return 1
+     fi
+             echo "Project name will be: $name"
+             echo "Deploy selected"
 }
 
 run_feature () {
