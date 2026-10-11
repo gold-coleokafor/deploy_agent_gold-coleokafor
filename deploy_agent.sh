@@ -27,7 +27,9 @@ read -p "Enter your project name: " name
              echo "Invalid input: Only A-Z, a-z, 0-9, _, and - allowed"
              return 1
      fi
-             echo "Project name will be: $name"
+project_folder="attendance_tracker_$name"
+
+             echo "Your project folder is $project_folder"
              echo "Deploy selected"
 }
 
