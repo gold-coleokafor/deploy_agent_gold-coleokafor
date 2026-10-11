@@ -23,6 +23,9 @@ read -p "Enter your project name: " name
      if [ -z "$name" ]; then 
              echo "Empty!!. Please input the project name"
              return 1
+     elif ! [[ "$name" =~ ^[A-Za-z0-9_-]+$ ]]; then
+             echo "Invalid input: Only A-Z, a-z, 0-9, _, and - allowed"
+             return 1
      fi
              echo "Project name will be: $name"
              echo "Deploy selected"
