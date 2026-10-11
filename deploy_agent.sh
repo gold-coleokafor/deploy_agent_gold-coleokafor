@@ -1,6 +1,24 @@
 #!/bin/bash 
 
+preflight_check () { 
+local found_a_missing_program=false
+	for program in python3 zip; do 
+	     if command -v "$program" >/dev/null 2>&1; then
+	        echo "$program found"
+	     else
+	        echo "$program missing"
+             found_a_missing_program=true 
+             fi
+        done
+       if [ "$found_a_missing_program" = true ]; then
+       exit 1 
+       fi 
+       check_py_version=$(python3 --version)
+                echo "$check_py_version"
+}
+
 deploy_feature () {
+preflight_check
      echo "Deploy selected"
 }
 
