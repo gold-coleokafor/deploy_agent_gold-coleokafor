@@ -28,9 +28,26 @@ read -p "Enter your project name: " name
              return 1
      fi
 project_folder="attendance_tracker_$name"
-
-             echo "Your project folder is $project_folder"
-             echo "Deploy selected"
+     if [ -d "$project_folder" ]; then
+         read -p "Folder exists. Overwrite (o) or abort (a)?: " answer
+            case "$answer" in
+     o|O)
+         echo "Old content will be removed and rewritten"
+        ;;
+     a|A)
+         echo "Aborted!"
+       return 1
+        ;;
+     *)
+        echo "Invalid input!!"
+        return 1
+        ;;
+            esac
+     else
+             echo "$project_folder doesn't exist. It will be created"
+     fi
+        echo "Your project folder is $project_folder"
+        echo "Deploy selected"
 }
 
 run_feature () {
@@ -71,4 +88,3 @@ while true; do
 done
 
 echo "Exiting menu, goodbye"
-
