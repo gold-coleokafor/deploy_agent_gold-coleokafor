@@ -1,7 +1,7 @@
 #!/bin/bash 
 
 script_folder=$(dirname "$0")
-names=("Chinedu Okafor" "Amara Adebayo" "Tunde Balogun" "Chioma Nwosu" "Olumide Popoola" "Zainab Abubakar" "Emeka Igwe" "Funmi Bello" "Tariq Musa" "Nneka Okeke ")
+names=("Chinedu Okafor" "Amara Adebayo" "Tunde Balogun" "Chioma Nwosu" "Olumide Popoola" "Zainab Abubakar" "Emeka Igwe" "Funmi Bello" "Tariq Musa" "Nneka Okeke")
 emails=("chinedu.okafor@email.com" "amara.adebayo92@email.com" "tunde.balogun.dev@email.com" "chioma.nwosu@email.com" "olumide.popoola@email.com" "zainab.abubakar@email.com" "emeka.igwe.tech@email.com" "funmi.bello88@email.com" "tariq.musa@email.com" "nneka.okeke@email.com" )
 preflight_check () { 
 local found_a_missing_program=false
@@ -97,7 +97,7 @@ read -p "Enter your project name: " name
                  echo "Please enter a whole number"
                  return 1
               fi
-               if [ "$generate" -ge 1 ] && [ "$generate" -le 10 ]; then
+              if [ "$generate" -ge 1 ] && [ "$generate" -le 10 ]; then
                  echo "Within specified range of 1-10"
               else
                  echo "Out of range! Please select a number between 1-10"
@@ -108,7 +108,12 @@ read -p "Enter your project name: " name
                  echo "${emails[$i]},${names[$i]},0,0" >> "$project_folder/Helpers/assets.csv"
               done
                  echo "Generated successfully"
-                 sed -i 's/"total_sessions": [0-9]*/"total_sessions": 1/' "$project_folder/Helpers/config.json"
+              if sed -i 's/"total_sessions": [0-9]*/"total_sessions": 1/' "$project_folder/Helpers/config.json"; then
+                 echo "Successfully reset total_sessions to 1"
+              else
+                 echo "Failed to update total_sessions in config.json"
+                 return 1
+              fi
               break
               ;;
               *)
@@ -179,12 +184,31 @@ read -p "Enter your project name: " name
                echo "Default alert threshold"
                ;;
             esac
-                 echo "Your project folder is $project_folder"
-                 echo "Deploy selected"
+               echo "Your project folder is $project_folder"
+               echo "Deploy completed. Running now to verify.."
+               run_feature "$project_folder"
 }
 
 run_feature () {
-     echo "Run selected"
+           if [ -z "$1" ]; then
+               read -p "Enter your project name: " name
+               project_folder="attendance_tracker_$name"
+           else
+               project_folder="$1"
+           fi
+               echo "Project folder is $project_folder"
+           if [ -d "$project_folder" ]; then
+               echo "Folder exists"
+           else
+               echo "Folder does not exist!"
+               return 1
+           fi
+           if ( cd "$project_folder" && python3 attendance_checker.py ); then
+               echo "Application ran successfully"
+           else
+               echo "Unable to run application"
+               return 1
+           fi
 }
 
 archive_feature () {
