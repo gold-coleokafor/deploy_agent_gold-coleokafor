@@ -32,7 +32,7 @@ project_folder="attendance_tracker_$name"
          read -p "Folder exists. Overwrite (o) or abort (a)?: " answer
             case "$answer" in
      o|O)
-         echo "Old content will be removed and rewritten"
+         rm -rf "$project_folder"
         ;;
      a|A)
          echo "Aborted!"
@@ -46,8 +46,15 @@ project_folder="attendance_tracker_$name"
      else
              echo "$project_folder doesn't exist. It will be created"
      fi
-        echo "Your project folder is $project_folder"
-        echo "Deploy selected"
+
+     if mkdir -p "$project_folder/Helpers" "$project_folder/reports"; then
+             echo "Both folders created"
+     else
+             echo "Error!, folders not created."
+         return 1
+     fi
+             echo "Your project folder is $project_folder"
+             echo "Deploy selected"
 }
 
 run_feature () {
