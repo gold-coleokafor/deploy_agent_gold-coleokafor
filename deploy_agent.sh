@@ -1,7 +1,8 @@
 #!/bin/bash 
 
 script_folder=$(dirname "$0")
-
+names=("Chinedu Okafor" "Amara Adebayo" "Tunde Balogun" "Chioma Nwosu" "Olumide Popoola" "Zainab Abubakar" "Emeka Igwe" "Funmi Bello" "Tariq Musa" "Nneka Okeke ")
+emails=("chinedu.okafor@email.com" "amara.adebayo92@email.com" "tunde.balogun.dev@email.com" "chioma.nwosu@email.com" "olumide.popoola@email.com" "zainab.abubakar@email.com" "emeka.igwe.tech@email.com" "funmi.bello88@email.com" "tariq.musa@email.com" "nneka.okeke@email.com" )
 preflight_check () { 
 local found_a_missing_program=false
 	for program in python3 zip; do 
@@ -66,7 +67,7 @@ read -p "Enter your project name: " name
      else
              echo "Error! Failed to copy config.json"
              return 1
-     fi
+     fi 
      while true; do
         read -p "Copy from the template (a) or Generate a fresh roster (b): " choice 
             case "$choice" in
@@ -77,7 +78,7 @@ read -p "Enter your project name: " name
                  return 1
               fi
                if [ "$number" -ge 1 ] && [ "$number" -le 10 ]; then
-                 echo "Within specified range"
+                 echo "Within specified range of 1-10"
               else
                  echo "Out of range! Please select a number between 1-10"
                  return 1
@@ -91,7 +92,23 @@ read -p "Enter your project name: " name
               break
               ;;
             b|B)
-              echo "This will generate a fresh roster"
+              read -p "How many students to generate: " generate
+              if ! [[ "$generate" =~ ^[0-9]+$ ]]; then
+                 echo "Please enter a whole number"
+                 return 1
+              fi
+               if [ "$generate" -ge 1 ] && [ "$generate" -le 10 ]; then
+                 echo "Within specified range of 1-10"
+              else
+                 echo "Out of range! Please select a number between 1-10"
+                 return 1
+              fi
+                 echo "Email,Names,Attendance Count,Absence Count" > "$project_folder/Helpers/assets.csv"
+              for (( i=0; i<generate; i++ )); do
+                 echo "${emails[$i]},${names[$i]},0,0" >> "$project_folder/Helpers/assets.csv"
+              done
+                 echo "Generated successfully"
+                 sed -i 's/"total_sessions": [0-9]*/"total_sessions": 1/' "$project_folder/Helpers/config.json"
               break
               ;;
               *)
