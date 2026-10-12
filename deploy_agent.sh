@@ -67,8 +67,40 @@ read -p "Enter your project name: " name
              echo "Error! Failed to copy config.json"
              return 1
      fi
-             echo "Your project folder is $project_folder"
-             echo "Deploy selected"
+     while true; do
+        read -p "Copy from the template (a) or Generate a fresh roster (b): " choice 
+            case "$choice" in
+            a|A)
+              read -p "How many students to copy: " number
+              if ! [[ "$number" =~ ^[0-9]+$ ]]; then
+                 echo "Please enter a whole number"
+                 return 1
+              fi
+               if [ "$number" -ge 1 ] && [ "$number" -le 10 ]; then
+                 echo "Within specified range"
+              else
+                 echo "Out of range! Please select a number between 1-10"
+                 return 1
+              fi
+              if head -n $(( number + 1 )) "$script_folder/templates/assets.csv" > "$project_folder/Helpers/assets.csv"; then
+                 echo "$number successfully copied"
+              else
+                 echo "Error! Failed to copy"
+                 return 1
+              fi
+              break
+              ;;
+            b|B)
+              echo "This will generate a fresh roster"
+              break
+              ;;
+              *)
+              echo "Invalid input!!"
+              ;;
+            esac
+     done
+              echo "Your project folder is $project_folder"
+              echo "Deploy selected"
 }
 
 run_feature () {
