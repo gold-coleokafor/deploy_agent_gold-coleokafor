@@ -1,5 +1,7 @@
 #!/bin/bash 
 
+script_folder=$(dirname "$0")
+
 preflight_check () { 
 local found_a_missing_program=false
 	for program in python3 zip; do 
@@ -18,7 +20,7 @@ local found_a_missing_program=false
 }
 
 deploy_feature () {
-preflight_check
+  preflight_check
 read -p "Enter your project name: " name
      if [ -z "$name" ]; then 
              echo "Empty!!. Please input the project name"
@@ -27,21 +29,21 @@ read -p "Enter your project name: " name
              echo "Invalid input: Only A-Z, a-z, 0-9, _, and - allowed"
              return 1
      fi
-project_folder="attendance_tracker_$name"
+  project_folder="attendance_tracker_$name"
      if [ -d "$project_folder" ]; then
          read -p "Folder exists. Overwrite (o) or abort (a)?: " answer
             case "$answer" in
-     o|O)
-         rm -rf "$project_folder"
-        ;;
-     a|A)
-         echo "Aborted!"
-       return 1
-        ;;
-     *)
-        echo "Invalid input!!"
-        return 1
-        ;;
+            o|O)
+               rm -rf "$project_folder"
+               ;;
+            a|A)
+               echo "Aborted!"
+               return 1
+               ;;
+              *)
+               echo "Invalid input!!"
+               return 1
+               ;;
             esac
      else
              echo "$project_folder doesn't exist. It will be created"
@@ -51,7 +53,19 @@ project_folder="attendance_tracker_$name"
              echo "Both folders created"
      else
              echo "Error!, folders not created."
-         return 1
+             return 1
+     fi
+     if cp "$script_folder/templates/attendance_checker.py" "$project_folder/"; then
+             echo "Successfully copied attendance_checker.py"
+     else
+             echo "Error! Failed to copy attendance_checker.py"
+             return 1
+     fi
+     if cp "$script_folder/templates/config.json" "$project_folder/Helpers/"; then
+             echo "Successfully copied config.json"
+     else
+             echo "Error! Failed to copy config.json"
+             return 1
      fi
              echo "Your project folder is $project_folder"
              echo "Deploy selected"
