@@ -116,8 +116,20 @@ read -p "Enter your project name: " name
               ;;
             esac
      done
-              echo "Your project folder is $project_folder"
-              echo "Deploy selected"
+              if chmod +x "$project_folder/attendance_checker.py"; then
+                 echo "Set execute permission for attendance_checker.py"
+               else
+                 echo "Failed to set permission"
+                 return 1
+              fi
+              if chmod 600 "$project_folder/Helpers/config.json"; then
+                 echo "Set owner-only read/write (600) for config.json"
+              else
+                 echo "Failed to set permission"
+                 return 1
+              fi
+                 echo "Your project folder is $project_folder"
+                 echo "Deploy selected"
 }
 
 run_feature () {
