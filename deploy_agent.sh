@@ -128,6 +128,57 @@ read -p "Enter your project name: " name
                  echo "Failed to set permission"
                  return 1
               fi
+           read -p "Update attendance alert thresholds?(y/n): " alert
+              case "$alert" in
+            y|Y)
+               read -p "Input warning threshold (default 75): " warning
+               read -p "Input failure threshold (default 50): " failure
+               warning=${warning:-75}
+               failure=${failure:-50}
+              if ! [[ "$warning" =~ ^[0-9]+$ ]]; then
+                 echo "Please enter a whole number"
+                 return 1
+              fi
+              if ! [[ "$failure" =~ ^[0-9]+$ ]]; then
+                 echo "Please enter a whole number"
+                 return 1
+              fi
+              if [ "$warning" -ge 1 ] && [ "$warning" -le 100 ]; then
+                 echo "Within specified range of 1-100"
+              else
+                 echo "Out of range! Please select a number between 1-100"
+                 return 1
+              fi
+              if [ "$failure" -ge 1 ] && [ "$failure" -le 100 ]; then
+                 echo "Within specified range of 1-100"
+              else
+                 echo "Out of range! Please select a number between 1-100"
+                 return 1
+              fi
+              if [ "$warning" -le "$failure" ]; then
+                 echo "Error! Warning threshold must be greater than the failure threshold"
+                 return 1
+              fi
+              if sed -i "s/\"warning\": [0-9]*/\"warning\": $warning/" "$project_folder/Helpers/config.json"; then
+                 echo "Successfully updated config.json (warning)"
+              else
+                 echo "Failed to update config.json (warning)"
+                 return 1
+              fi
+              if sed -i "s/\"failure\": [0-9]*/\"failure\": $failure/" "$project_folder/Helpers/config.json"; then
+                 echo "Successfully updated config.json (failure)"
+              else 
+                 echo "Failed to update config.json (failure)"
+                 return 1
+              fi
+               ;;
+            n|N)
+               echo "Alert thresholds will not be changed"
+               ;;
+              *)
+               echo "Default alert threshold"
+               ;;
+            esac
                  echo "Your project folder is $project_folder"
                  echo "Deploy selected"
 }
