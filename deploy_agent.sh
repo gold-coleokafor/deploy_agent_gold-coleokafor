@@ -20,17 +20,48 @@ local found_a_missing_program=false
                 echo "$check_py_version"
 }
 
+signal_feature () {
+    trap - SIGINT SIGTSTP
+    echo "Deployment was interrupted."
+
+    if [ -z "$project_folder" ]; then
+        echo "Error: No project folder was active. Cleanup skipped."
+        exit 1
+    fi
+    if [ ! -d "$project_folder" ]; then
+    echo "Nothing to archive: $project_folder does not exist yet."
+    exit 1
+    fi
+    if [ -f "${project_folder}_archive.zip" ]; then
+        rm -f "${project_folder}_archive.zip"
+    fi
+
+    echo "Archiving the incomplete program '$project_folder'..."
+
+    if zip -r "${project_folder}_archive.zip" "$project_folder"; then
+        echo "Success: Archive created at '${project_folder}_archive.zip'."
+        rm -rf "$project_folder"
+        echo "Success: Incomplete directory '$project_folder' has been removed."
+    else
+        echo "Error: Failed to create zip archive. Safe mode engaged: '$project_folder' was kept intact."
+    fi
+    exit 1
+}
 deploy_feature () {
+  project_folder=""
   preflight_check
 read -p "Enter your project name: " name
      if [ -z "$name" ]; then 
              echo "Empty!!. Please input the project name"
+             trap - SIGINT SIGTSTP
              return 1
      elif ! [[ "$name" =~ ^[A-Za-z0-9_-]+$ ]]; then
              echo "Invalid input: Only A-Z, a-z, 0-9, _, and - allowed"
+             trap - SIGINT SIGTSTP
              return 1
      fi
   project_folder="attendance_tracker_$name"
+
      if [ -d "$project_folder" ]; then
          read -p "Folder exists. Overwrite (o) or abort (a)?: " answer
             case "$answer" in
@@ -43,29 +74,33 @@ read -p "Enter your project name: " name
                ;;
               *)
                echo "Invalid input!!"
+               trap - SIGINT SIGTSTP
                return 1
                ;;
             esac
      else
              echo "$project_folder doesn't exist. It will be created"
      fi
-
+     trap signal_feature SIGINT SIGTSTP
      if mkdir -p "$project_folder/Helpers" "$project_folder/reports"; then
              echo "Both folders created"
      else
              echo "Error!, folders not created."
+             trap - SIGINT SIGTSTP
              return 1
      fi
      if cp "$script_folder/templates/attendance_checker.py" "$project_folder/"; then
              echo "Successfully copied attendance_checker.py"
      else
              echo "Error! Failed to copy attendance_checker.py"
+             trap - SIGINT SIGTSTP
              return 1
      fi
      if cp "$script_folder/templates/config.json" "$project_folder/Helpers/"; then
              echo "Successfully copied config.json"
      else
              echo "Error! Failed to copy config.json"
+             trap - SIGINT SIGTSTP
              return 1
      fi 
      while true; do
@@ -75,18 +110,21 @@ read -p "Enter your project name: " name
               read -p "How many students to copy: " number
               if ! [[ "$number" =~ ^[0-9]+$ ]]; then
                  echo "Please enter a whole number"
+                 trap - SIGINT SIGTSTP
                  return 1
               fi
                if [ "$number" -ge 1 ] && [ "$number" -le 10 ]; then
                  echo "Within specified range of 1-10"
               else
                  echo "Out of range! Please select a number between 1-10"
+                 trap - SIGINT SIGTSTP
                  return 1
               fi
               if head -n $(( number + 1 )) "$script_folder/templates/assets.csv" > "$project_folder/Helpers/assets.csv"; then
                  echo "$number successfully copied"
               else
                  echo "Error! Failed to copy"
+         Invalid choice, keeping default thresholds        trap - SIGINT SIGTSTP
                  return 1
               fi
               break
@@ -95,12 +133,14 @@ read -p "Enter your project name: " name
               read -p "How many students to generate: " generate
               if ! [[ "$generate" =~ ^[0-9]+$ ]]; then
                  echo "Please enter a whole number"
+                 trap - SIGINT SIGTSTP
                  return 1
               fi
               if [ "$generate" -ge 1 ] && [ "$generate" -le 10 ]; then
                  echo "Within specified range of 1-10"
               else
                  echo "Out of range! Please select a number between 1-10"
+                 trap - SIGINT SIGTSTP
                  return 1
               fi
                  echo "Email,Names,Attendance Count,Absence Count" > "$project_folder/Helpers/assets.csv"
@@ -112,6 +152,7 @@ read -p "Enter your project name: " name
                  echo "Successfully reset total_sessions to 1"
               else
                  echo "Failed to update total_sessions in config.json"
+                 trap - SIGINT SIGTSTP
                  return 1
               fi
               break
@@ -125,12 +166,14 @@ read -p "Enter your project name: " name
                  echo "Set execute permission for attendance_checker.py"
                else
                  echo "Failed to set permission"
+                 trap - SIGINT SIGTSTP
                  return 1
               fi
               if chmod 600 "$project_folder/Helpers/config.json"; then
                  echo "Set owner-only read/write (600) for config.json"
               else
                  echo "Failed to set permission"
+                 trap - SIGINT SIGTSTP
                  return 1
               fi
            read -p "Update attendance alert thresholds?(y/n): " alert
@@ -142,38 +185,45 @@ read -p "Enter your project name: " name
                failure=${failure:-50}
               if ! [[ "$warning" =~ ^[0-9]+$ ]]; then
                  echo "Please enter a whole number"
+                 trap - SIGINT SIGTSTP
                  return 1
               fi
               if ! [[ "$failure" =~ ^[0-9]+$ ]]; then
                  echo "Please enter a whole number"
+                 trap - SIGINT SIGTSTP
                  return 1
               fi
               if [ "$warning" -ge 1 ] && [ "$warning" -le 100 ]; then
                  echo "Within specified range of 1-100"
               else
                  echo "Out of range! Please select a number between 1-100"
+                 trap - SIGINT SIGTSTP
                  return 1
               fi
               if [ "$failure" -ge 1 ] && [ "$failure" -le 100 ]; then
                  echo "Within specified range of 1-100"
               else
                  echo "Out of range! Please select a number between 1-100"
+                 trap - SIGINT SIGTSTP
                  return 1
               fi
               if [ "$warning" -le "$failure" ]; then
                  echo "Error! Warning threshold must be greater than the failure threshold"
+                 trap - SIGINT SIGTSTP
                  return 1
               fi
               if sed -i "s/\"warning\": [0-9]*/\"warning\": $warning/" "$project_folder/Helpers/config.json"; then
                  echo "Successfully updated config.json (warning)"
               else
                  echo "Failed to update config.json (warning)"
+                 trap - SIGINT SIGTSTP
                  return 1
               fi
               if sed -i "s/\"failure\": [0-9]*/\"failure\": $failure/" "$project_folder/Helpers/config.json"; then
                  echo "Successfully updated config.json (failure)"
               else 
                  echo "Failed to update config.json (failure)"
+                 trap - SIGINT SIGTSTP
                  return 1
               fi
                ;;
@@ -181,11 +231,12 @@ read -p "Enter your project name: " name
                echo "Alert thresholds will not be changed"
                ;;
               *)
-               echo "Default alert threshold"
+               echo "Invalid choice, keeping default thresholds"
                ;;
             esac
                echo "Your project folder is $project_folder"
                echo "Deploy completed. Running now to verify.."
+               trap - SIGINT SIGTSTP
                run_feature "$project_folder"
 }
 
@@ -201,12 +252,14 @@ run_feature () {
                echo "Folder exists"
            else
                echo "Folder does not exist!"
+               trap - SIGINT SIGTSTP
                return 1
            fi
            if ( cd "$project_folder" && python3 attendance_checker.py ); then
                echo "Application ran successfully"
            else
                echo "Unable to run application"
+               trap - SIGINT SIGTSTP
                return 1
            fi
 }
@@ -223,12 +276,14 @@ archive_feature () {
                echo "Folder exists"
            else
                echo "Folder does not exist!"
+               trap - SIGINT SIGTSTP
                return 1
            fi
            if mkdir -p "$project_folder/archives/attendance" "$project_folder/archives/absent"; then
                echo "Folders created"
            else
                echo "Unable to create folders"
+               trap - SIGINT SIGTSTP
                return 1
            fi
         timestamp=$(date +%Y%m%d_%H%M%S)
