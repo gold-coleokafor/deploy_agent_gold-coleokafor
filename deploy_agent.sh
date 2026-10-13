@@ -212,7 +212,38 @@ run_feature () {
 }
 
 archive_feature () {
-     echo "Archive selected"
+           if [ -z "$1" ]; then
+               read -p "Enter your project name: " name
+               project_folder="attendance_tracker_$name"
+           else
+               project_folder="$1"
+           fi
+               echo "Project folder is $project_folder"
+           if [ -d "$project_folder" ]; then
+               echo "Folder exists"
+           else
+               echo "Folder does not exist!"
+               return 1
+           fi
+           if mkdir -p "$project_folder/archives/attendance" "$project_folder/archives/absent"; then
+               echo "Folders created"
+           else
+               echo "Unable to create folders"
+               return 1
+           fi
+        timestamp=$(date +%Y%m%d_%H%M%S)
+           if [ -f "$project_folder/reports/attendance.log" ]; then
+               cp "$project_folder/reports/attendance.log" "$project_folder/archives/attendance/attendance_$timestamp.log"
+               echo "Successfully archived attendance.log to $project_folder/archives/attendance/attendance_$timestamp.log"
+           else
+               echo "Unable to find attendance.log"
+           fi
+           if [ -f "$project_folder/reports/absent.log" ]; then
+               cp "$project_folder/reports/absent.log" "$project_folder/archives/absent/absent_$timestamp.log"
+               echo "Successfully archived absent.log to $project_folder/archives/absent/absent_$timestamp.log"
+           else
+               echo "Unable to find absent.log: nobody was absent"
+           fi
 }
 
 show_menu () { 
