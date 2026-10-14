@@ -163,3 +163,6 @@ Whatever had been built when the signal arrived, with paths starting at the proj
 - `rm -rf` only ever runs on a name that was validated and prefixed with `attendance_tracker_`.
 - Test projects and zip files are excluded from Git through `.gitignore`.
 - Pre-flight uses `exit 1` because without `python3` and `zip` nothing else can work. Failures inside Deploy use `return 1` so the user lands back in the menu. The interrupt handler uses `exit 1` because the assignment says to close the session.
+## Video Walkthrough
+   [Watch the run-through video](https://youtu.be/A8dJBltSPbI)
+   Backup video access: (https://www.loom.com/share/9f1247a9fd194ce0bcb9e7cacfaee3f5) 
