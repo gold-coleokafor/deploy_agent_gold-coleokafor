@@ -124,7 +124,7 @@ read -p "Enter your project name: " name
                  echo "$number successfully copied"
               else
                  echo "Error! Failed to copy"
-         Invalid choice, keeping default thresholds        trap - SIGINT SIGTSTP
+                 trap - SIGINT SIGTSTP
                  return 1
               fi
               break
